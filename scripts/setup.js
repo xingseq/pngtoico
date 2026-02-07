@@ -88,16 +88,40 @@ async function extractZip(zipPath, destDir) {
 }
 
 /**
+ * Install png-to-ico dependencies if needed
+ */
+async function installPngToIcoDependencies() {
+  const nodeModulesPath = path.join(TARGET_DIR, 'node_modules');
+  
+  if (fs.existsSync(nodeModulesPath)) {
+    console.log('png-to-ico dependencies already installed.');
+    return;
+  }
+  
+  console.log('\nInstalling png-to-ico dependencies...');
+  
+  try {
+    await execAsync('npm install', { cwd: TARGET_DIR });
+    console.log('png-to-ico dependencies installed successfully.');
+  } catch (error) {
+    console.error('Warning: Failed to install png-to-ico dependencies:', error.message);
+    console.error('You can manually run: cd external/png-to-ico-main && npm install');
+  }
+}
+
+/**
  * Main setup function
  */
 async function setup() {
   console.log('=== PNG-to-ICO Setup ===\n');
   
-  // Check if external library already exists
   const indexPath = path.join(TARGET_DIR, 'index.js');
+  
+  // Check if library source exists
   if (fs.existsSync(indexPath)) {
     console.log('png-to-ico library already exists at:', TARGET_DIR);
-    console.log('Setup complete. Nothing to do.\n');
+    // Still need to check and install dependencies
+    await installPngToIcoDependencies();
     return;
   }
   
@@ -120,18 +144,16 @@ async function setup() {
     fs.unlinkSync(ZIP_FILE);
     console.log('Cleaned up temporary files.');
     
-    // Install dependencies for png-to-ico library
-    console.log('\nInstalling png-to-ico dependencies...');
-    await execAsync('npm install', { cwd: TARGET_DIR });
-    console.log('png-to-ico dependencies installed successfully.');
-    
-    // Verify installation
-    if (fs.existsSync(indexPath)) {
-      console.log('\n=== Setup completed successfully! ===');
-      console.log('png-to-ico library installed at:', TARGET_DIR);
-    } else {
+    // Verify extraction
+    if (!fs.existsSync(indexPath)) {
       throw new Error('Installation verification failed. index.js not found.');
     }
+    
+    // Install dependencies
+    await installPngToIcoDependencies();
+    
+    console.log('\n=== Setup completed successfully! ===');
+    console.log('png-to-ico library installed at:', TARGET_DIR);
     
   } catch (error) {
     console.error('\n=== Setup failed ===');
