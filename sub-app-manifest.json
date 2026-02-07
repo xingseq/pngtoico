@@ -4,7 +4,7 @@
   "version": "3.0.1",
   "description": "将 PNG 图片转换为 Windows ICO 图标格式",
   "required": false,
-  "externalPath": "C:\\Users\\nmlsz\\Dev\\demo\\work\\png-to-ico-main",
+  "externalPath": "./external/png-to-ico-main",
   "capabilities": ["image.convert:png-to-ico"],
   "cli": {
     "enabled": true,

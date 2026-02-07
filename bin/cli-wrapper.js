@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-import { pathToFileURL } from 'url';
+import { pathToFileURL, fileURLToPath } from 'url';
 
-const EXTERNAL_PATH = 'C:\\Users\\nmlsz\\Dev\\demo\\work\\png-to-ico-main';
+// Get the external path dynamically
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.resolve(__dirname, '..');
+const EXTERNAL_PATH = path.join(ROOT_DIR, 'external', 'png-to-ico-main');
 
 function parseArgs(args) {
   const result = { _: [], output: null, help: false };

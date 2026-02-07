@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "setup": "node scripts/setup.js",
+    "postinstall": "npm run setup",
     "server": "node lib/server.js",
     "subapp": "concurrently \"npm run server\" \"npm run dev --prefix ui\"",
     "subapp:stop": "taskkill /F /IM node.exe /FI \"WINDOWTITLE eq *png-to-ico*\" 2>nul || exit 0",
