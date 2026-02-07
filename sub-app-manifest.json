@@ -1,0 +1,32 @@
+{
+  "name": "png-to-ico",
+  "displayName": "PNG 转 ICO",
+  "version": "3.0.1",
+  "description": "将 PNG 图片转换为 Windows ICO 图标格式",
+  "required": false,
+  "externalPath": "C:\\Users\\nmlsz\\Dev\\demo\\work\\png-to-ico-main",
+  "capabilities": ["image.convert:png-to-ico"],
+  "cli": {
+    "enabled": true,
+    "bin": "./bin/cli-wrapper.js",
+    "commands": {
+      "convert": {
+        "description": "将 PNG 转换为 ICO 图标",
+        "args": ["<input>", "--output"]
+      }
+    }
+  },
+  "api": { "enabled": false },
+  "ui": {
+    "enabled": true,
+    "port": 5179,
+    "startCommand": "npm run subapp",
+    "stopCommand": "npm run subapp:stop",
+    "entry": "./ui/dist/index.html",
+    "buildCommand": "npm run build",
+    "requireBuild": true,
+    "routes": [
+      { "path": "/", "name": "转换" }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "png-to-ico-wrapper",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "server": "node lib/server.js",
+    "subapp": "concurrently \"npm run server\" \"npm run dev --prefix ui\"",
+    "subapp:stop": "taskkill /F /IM node.exe /FI \"WINDOWTITLE eq *png-to-ico*\" 2>nul || exit 0",
+    "build": "npm run build --prefix ui"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
