@@ -138,5 +138,28 @@ async function setup() {
   }
 }
 
+/**
+ * Install UI dependencies if needed
+ */
+async function installUIDependencies() {
+  const uiNodeModules = path.join(ROOT_DIR, 'ui', 'node_modules');
+  
+  if (fs.existsSync(uiNodeModules)) {
+    console.log('UI dependencies already installed.');
+    return;
+  }
+  
+  console.log('\nInstalling UI dependencies...');
+  
+  try {
+    const uiDir = path.join(ROOT_DIR, 'ui');
+    await execAsync('npm install', { cwd: uiDir });
+    console.log('UI dependencies installed successfully.');
+  } catch (error) {
+    console.error('Warning: Failed to install UI dependencies:', error.message);
+    console.error('You can manually run: npm install --prefix ui');
+  }
+}
+
 // Run setup
-setup();
+setup().then(() => installUIDependencies());
