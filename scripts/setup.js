@@ -120,6 +120,11 @@ async function setup() {
     fs.unlinkSync(ZIP_FILE);
     console.log('Cleaned up temporary files.');
     
+    // Install dependencies for png-to-ico library
+    console.log('\nInstalling png-to-ico dependencies...');
+    await execAsync('npm install', { cwd: TARGET_DIR });
+    console.log('png-to-ico dependencies installed successfully.');
+    
     // Verify installation
     if (fs.existsSync(indexPath)) {
       console.log('\n=== Setup completed successfully! ===');
