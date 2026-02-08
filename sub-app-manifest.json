@@ -9,10 +9,11 @@
   "cli": {
     "enabled": true,
     "bin": "./bin/cli-wrapper.js",
+    "style": "direct",
     "commands": {
       "convert": {
         "description": "将 PNG 转换为 ICO 图标",
-        "args": ["<input>", "--output"]
+        "args": ["input", "--output"]
       }
     }
   },
