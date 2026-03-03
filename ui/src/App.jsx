@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Image, Download, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react'
+import { Image, Download, RefreshCw, CheckCircle, AlertCircle, Ruler } from 'lucide-react'
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(false)
@@ -12,6 +12,12 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+
+  // ICO analysis states
+  const [selectedIcoFile, setSelectedIcoFile] = useState(null)
+  const [analysisResult, setAnalysisResult] = useState(null)
+  const [analysisError, setAnalysisError] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -75,6 +81,45 @@ export default function App() {
     a.click()
   }
 
+  // ICO analysis handlers
+  const handleIcoFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedIcoFile(file)
+      setAnalysisResult(null)
+      setAnalysisError(null)
+    }
+  }
+
+  const handleAnalyze = async () => {
+    if (!selectedIcoFile) return
+    setAnalyzing(true)
+    setAnalysisError(null)
+    setAnalysisResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', selectedIcoFile)
+      
+      const res = await fetch('/api/analyze-ico', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Analysis failed')
+      }
+      
+      const data = await res.json()
+      setAnalysisResult(data)
+    } catch (err) {
+      setAnalysisError(err.message)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       <header className="sticky top-0 z-50 glass-effect border-b border-gray-200/50 dark:border-gray-700/50">
@@ -90,7 +135,10 @@ export default function App() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+        {/* PNG to ICO Conversion Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6 mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">PNG to ICO Conversion</h2>
+          
           {/* File Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -145,6 +193,67 @@ export default function App() {
             <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center gap-2 text-red-700 dark:text-red-400">
               <AlertCircle className="w-5 h-5" />
               <span>{error}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ICO Analysis Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">ICO File Analysis</h2>
+          
+          {/* ICO File Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Select ICO File
+            </label>
+            <input
+              type="file"
+              accept=".ico,image/x-icon"
+              onChange={handleIcoFileChange}
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-100 file:text-blue-700 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+            />
+          </div>
+
+          {/* Analyze Button */}
+          <button
+            onClick={handleAnalyze}
+            disabled={!selectedIcoFile || analyzing}
+            className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl font-medium transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {analyzing ? (
+              <><RefreshCw className="w-5 h-5 animate-spin" /> Analyzing...</>
+            ) : (
+              <><Ruler className="w-5 h-5" /> Analyze ICO File</>
+            )}
+          </button>
+
+          {/* Analysis Result */}
+          {analysisResult && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl space-y-3">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-medium">Analysis successful!</span>
+              </div>
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                <p><span className="font-medium">File:</span> {analysisResult.filename}</p>
+                <p><span className="font-medium">Number of images:</span> {analysisResult.numImages}</p>
+                <p className="font-medium mt-2">Supported sizes:</p>
+                <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+                  {analysisResult.sizes.map((size, index) => (
+                    <li key={index} className="px-3 py-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-center">
+                      <span className="font-medium">{size.width} × {size.height}</span> pixels
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Error */}
+          {analysisError && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center gap-2 text-red-700 dark:text-red-400">
+              <AlertCircle className="w-5 h-5" />
+              <span>{analysisError}</span>
             </div>
           )}
         </div>
